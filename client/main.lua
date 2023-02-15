@@ -1,108 +1,141 @@
 local Status, isPaused = {}, false
 
-function GetStatusData(minimal)
-	local status = {}
+function convertStatus()
+	local result = {}
 
-	for i=1, #Status, 1 do
-		if minimal then
-			table.insert(status, {
-				name    = Status[i].name,
-				val     = Status[i].val,
-				percent = (Status[i].val / Config.StatusMax) * 100
-			})
-		else
-			table.insert(status, {
-				name    = Status[i].name,
-				val     = Status[i].val,
-				color   = Status[i].color,
-				visible = Status[i].visible(Status[i]),
-				percent = (Status[i].val / Config.StatusMax) * 100
-			})
-		end
+	for name, status in pairs(Status) do
+		result[name] = status.val
 	end
 
-	return status
+	return result
+end
+
+function GetStatusData()
+	local data = {}
+
+	for name, status in pairs(Status) do
+		data[#data + 1] = {
+			name = name,
+			val = status.val,
+			percent = (status.val / Config.StatusMax) * 100,
+			color = status.color,
+			visible = status.visible(status)
+		}
+	end
+
+	return data
 end
 
 AddEventHandler('esx_status:registerStatus', function(name, default, color, visible, tickCallback)
 	local status = CreateStatus(name, default, color, visible, tickCallback)
-	table.insert(Status, status)
+
+	Status[name] = status
 end)
 
 AddEventHandler('esx_status:unregisterStatus', function(name)
-	for k,v in ipairs(Status) do
-		if v.name == name then
-			table.remove(Status, k)
-			break
-		end
-	end
+	Status[name] = nil
 end)
 
 RegisterNetEvent('esx:onPlayerLogout')
 AddEventHandler('esx:onPlayerLogout', function()
 	ESX.PlayerLoaded = false
 	Status = {}
+
 	if Config.Display then
 		SendNUIMessage({
 			update = true,
-			status = Status
+			status = {}
 		})
 	end
 end)
 
 RegisterNetEvent('esx_status:load')
-AddEventHandler('esx_status:load', function(status)
+AddEventHandler('esx_status:load', function(newStatus)
 	ESX.PlayerLoaded = true
+
 	TriggerEvent('esx_status:loaded')
-	for i=1, #Status, 1 do
-		for j=1, #status, 1 do
-			if Status[i].name == status[j].name then
-				Status[i].set(status[j].val)
-			end
-		end
+
+	for name,value in pairs(newStatus) do 
+		Status[name].set(value)
 	end
+
+	SetEntityHealth(PlayerPedId(), Status['health'].get())
+	SetPedArmour(PlayerPedId(), Status['health'].get())
+
+	TriggerServerEvent('esx_status:update', convertStatus())
 
 	if Config.Display then TriggerEvent('esx_status:setDisplay', 0.5) end
 
 	CreateThread(function()
-		local data = {}
 		while ESX.PlayerLoaded do
-			for i=1, #Status do
-				Status[i].onTick()
-				table.insert(data, {
-					name = Status[i].name,
-					val = Status[i].val,
-					percent = (Status[i].val / 1000000) * 100
-				})
+			local data = {}
+
+			for name, status in pairs(Status) do 
+				status.onTick()
+
+				data[#data + 1] = {
+					name = name,
+					val = status.val,
+					percent = (status.val / 1000000) * 100,
+					color = status.color,
+					visible = status.visible(status)
+				}
 			end
 
-			if Config.Display then
-				local fullData = data
-				for i=1, #data, 1 do
-					fullData[i].color = Status[i].color
-					fullData[i].visible = Status[i].visible(Status[i])
-				end
+			if Config.Display then 
 				SendNUIMessage({
 					update = true,
-					status = fullData
+					status = data
 				})
 			end
 
 			TriggerEvent('esx_status:onTick', data)
-			table.wipe(data)
 			Wait(Config.TickTime)
 		end
 	end)
 end)
 
+RegisterNetEvent('esx_status:loaded')
+AddEventHandler('esx_status:loaded', function()
+	TriggerEvent('esx_status:registerStatus', 'hunger', 1000000, '#CFAD0F', function(status)
+		return true
+	end,
+		function(status) status.remove(100)
+	end)
+
+	TriggerEvent('esx_status:registerStatus', 'thirst', 1000000, '#0C98F1', function(status)
+		return true
+	end,
+		function(status) status.remove(75)
+	end)
+
+	TriggerEvent('esx_status:registerStatus', 'health', GetEntityMaxHealth(PlayerPedId()), '#19cf0f', function(status)
+		return false
+	end,
+		function(status) status.remove(0)
+	end)
+
+	TriggerEvent('esx_status:registerStatus', 'armor', GetPedArmour(PlayerPedId()), '#0f3fcf', function(status)
+		return false
+	end,
+		function(status) status.remove(0)
+	end)
+
+	TriggerEvent('esx_status:registerStatus', 'drunk', 0, '#8F15A5', function(status)
+      	if status.val > 0 then
+        	return true
+      	else
+        	return false
+      	end
+    end, function(status)
+      	status.remove(1500)
+    end)
+end)
+
 RegisterNetEvent('esx_status:set')
 AddEventHandler('esx_status:set', function(name, val)
-	for i=1, #Status, 1 do
-		if Status[i].name == name then
-			Status[i].set(val)
-			break
-		end
-	end
+	Status[name].set(val)
+
 	if Config.Display then
 		SendNUIMessage({
 			update = true,
@@ -113,12 +146,8 @@ end)
 
 RegisterNetEvent('esx_status:add')
 AddEventHandler('esx_status:add', function(name, val)
-	for i=1, #Status, 1 do
-		if Status[i].name == name then
-			Status[i].add(val)
-			break
-		end
-	end
+	Status[name].add(val)
+
 	if Config.Display then
 		SendNUIMessage({
 			update = true,
@@ -129,26 +158,13 @@ end)
 
 RegisterNetEvent('esx_status:remove')
 AddEventHandler('esx_status:remove', function(name, val)
-	for i=1, #Status, 1 do
-		if Status[i].name == name then
-			Status[i].remove(val)
-			break
-		end
-	end
-		if Config.Display then
+	Status[name].remove(val)
+
+	if Config.Display then
 		SendNUIMessage({
 			update = true,
 			status = GetStatusData()
 		})
-	end
-end)
-
-AddEventHandler('esx_status:getStatus', function(name, cb)
-	for i=1, #Status, 1 do
-		if Status[i].name == name then
-			cb(Status[i])
-			return
-		end
 	end
 end)
 
@@ -187,6 +203,15 @@ end)
 CreateThread(function()
 	while true do
 		Wait(Config.UpdateInterval)
-		if ESX.PlayerLoaded then TriggerServerEvent('esx_status:update', GetStatusData(true)) end
+
+		if ESX.PlayerLoaded then
+			TriggerServerEvent('esx_status:update', convertStatus())
+		end
 	end
 end)
+
+function getStatus(statusName)
+	return Status[statusName]
+end
+
+exports("getStatus", getStatus)

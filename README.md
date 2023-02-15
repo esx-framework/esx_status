@@ -14,9 +14,7 @@ git clone https://github.com/esx-framework/esx_status esx_status
 start esx_status
 ```
 
-[HOWTO]
-
-server.lua
+## Client.lua
 ```lua
 
 local name    = 'hunger'
@@ -32,6 +30,18 @@ TriggerEvent('esx_status:registerStatus', name, default, color,
 	end,
 	{remove = 200} -- Client action (add / remove) so the client can be in sync with server
 )
+```
 
+## Exports Server-Side
 
+### getStatus
+```lua
+exports["esx_status"]:getStatus(PlayerId, statusName)
+```
+
+## Exports Client-Side
+
+### getStatus
+```lua
+exports["esx_status"]:getStatus(statusName)
 ```
