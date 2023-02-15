@@ -60,7 +60,7 @@ AddEventHandler('esx_status:load', function(newStatus)
 	end
 
 	SetEntityHealth(PlayerPedId(), Status['health'].get())
-	SetPedArmour(PlayerPedId(), Status['health'].get())
+	SetPedArmour(PlayerPedId(), Status['armor'].get())
 
 	TriggerServerEvent('esx_status:update', convertStatus())
 

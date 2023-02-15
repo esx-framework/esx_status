@@ -49,10 +49,6 @@ function CreateStatus(name, default, color, visible, tickCallback)
 		return (self.val / Config.StatusMax) * 100
 	end
 
-	function self.getVisible()
-		return self.visible
-	end
-
 	return self
 
 end
