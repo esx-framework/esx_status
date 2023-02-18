@@ -4,7 +4,7 @@ game 'gta5'
 
 description 'ESX Status'
 
-version '1.0'
+version '2.0'
 legacyversion '1.9.1'
 
 lua54 'yes'
@@ -13,14 +13,18 @@ shared_script '@es_extended/imports.lua'
 
 server_scripts {
 	'@oxmysql/lib/MySQL.lua',
+	'@es_extended/locale.lua',
+    'locales/*.lua',
 	'config.lua',
-	'server/main.lua'
+	'server/*.lua'
 }
 
 client_scripts {
-	'config.lua',
+	'@es_extended/locale.lua',
+    'locales/*.lua',
 	'client/classes/status.lua',
-	'client/main.lua'
+	'config.lua',
+	'client/*.lua'
 }
 
 ui_page 'html/ui.html'

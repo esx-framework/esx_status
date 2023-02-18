@@ -25,6 +25,10 @@ function CreateStatus(name, default, color, visible, tickCallback)
 		self.val = val
 	end
 
+	function self.get()
+		return self.val
+	end
+
 	function self.add(val)
 		if self.val + val > Config.StatusMax then
 			self.val = Config.StatusMax
