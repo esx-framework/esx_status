@@ -29,14 +29,17 @@ end)
 
 AddEventHandler('esx:playerDropped', function(playerId)
 	local xPlayer = ESX.GetPlayerFromId(playerId)
-	local Status = PlayerStatus[xPlayer.source]
-	local Ped = GetPlayerPed(playerId)
 
-	for name, status in pairs(Status) do 
-		if name == 'health' then 
-			Status[name] = GetEntityHealth(Ped)
-		elseif name == 'armor' then 
-			Status[name] = GetPedArmour(Ped)
+	if Config.EnableHealth and Config.EnableArmor then
+		local Status = PlayerStatus[xPlayer.source]
+		local Ped = GetPlayerPed(playerId)
+
+		for name, status in pairs(Status) do 
+			if name == 'health' then 
+				Status[name] = GetEntityHealth(Ped)
+			elseif name == 'armor' then 
+				Status[name] = GetPedArmour(Ped)
+			end
 		end
 	end
 
