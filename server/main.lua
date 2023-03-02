@@ -29,20 +29,20 @@ end)
 
 AddEventHandler('esx:playerDropped', function(playerId)
 	local xPlayer = ESX.GetPlayerFromId(playerId)
+	local Status = PlayerStatus[xPlayer.source]
 
 	if Config.EnableHealth and Config.EnableArmor then
-		local Status = PlayerStatus[xPlayer.source]
-		local Ped = GetPlayerPed(playerId)
+		local playerPed = GetPlayerPed(playerId)
 
 		for name, status in pairs(Status) do 
 			if name == 'health' then 
-				Status[name] = GetEntityHealth(Ped)
+				Status[name] = GetEntityHealth(playerPed)
 			elseif name == 'armor' then 
-				Status[name] = GetPedArmour(Ped)
+				Status[name] = GetPedArmour(playerPed)
 			end
 		end
 	end
-
+	
 	MySQL.update('UPDATE users SET status = ? WHERE identifier = ?', { json.encode(Status), xPlayer.identifier })
 	PlayerStatus[xPlayer.source] = nil
 end)
