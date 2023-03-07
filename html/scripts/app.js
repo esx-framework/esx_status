@@ -1,59 +1,54 @@
 (function () {
-	let status = [];
+  let status = [];
 
-	let renderStatus = function () {
+  let renderStatus = function () {
+    $("#status_list").html("");
 
-		$('#status_list').html('');
+    for (let i = 0; i < status.length; i++) {
+      if (!status[i].visible) {
+        continue;
+      }
 
-		for (let i = 0; i < status.length; i++) {
+      let statusDiv = $(
+        '<div class="status">' +
+          '<div class="status_inner">' +
+          '<div class="status_val"></div>' +
+          "</div>" +
+          "</div>"
+      );
 
-			if (!status[i].visible) {
-				continue;
-			}
+      statusDiv
+        .find(".status_inner")
+        .css({ border: "1px solid " + status[i].color });
 
-			let statusDiv = $(
-				'<div class="status">' +
-					'<div class="status_inner">' +
-						'<div class="status_val"></div>' +
-					'</div>' +
-				'</div>');
+      statusDiv.find(".status_val").css({
+        "background-color": status[i].color,
+        width: status[i].percent + "%",
+      });
 
-			statusDiv.find('.status_inner')
-				.css({ 'border': '1px solid ' + status[i].color })
-				;
+      $("#status_list").append(statusDiv);
+    }
+  };
 
-			statusDiv.find('.status_val')
-				.css({
-					'background-color': status[i].color,
-					'width': (status[i].percent) + '%'
-				})
-				;
+  window.onData = function (data) {
+    if (data.update) {
+      status.length = 0;
 
-			$('#status_list').append(statusDiv);
-		}
+      for (let i = 0; i < data.status.length; i++) {
+        status.push(data.status[i]);
+      }
 
-	};
+      renderStatus();
+    }
 
-	window.onData = function (data) {
-		if (data.update) {
-			status.length = 0;
+    if (data.setDisplay) {
+      $("#status_list").css({ opacity: data.display });
+    }
+  };
 
-			for (let i = 0; i < data.status.length; i++) {
-				status.push(data.status[i]);
-			}
-
-			renderStatus();
-		}
-
-		if (data.setDisplay) {
-			$('#status_list').css({ 'opacity': data.display });
-		}
-	};
-
-	window.onload = function (e) {
-		window.addEventListener('message', function (event) {
-			onData(event.data);
-		});
-	};
-
+  window.onload = function (e) {
+    window.addEventListener("message", function (event) {
+      onData(event.data);
+    });
+  };
 })();
