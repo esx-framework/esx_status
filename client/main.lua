@@ -161,27 +161,23 @@ end)
 
 -- Pause menu disable hud display
 if Config.Display then
-	CreateThread(function()
-		while true do
-			Wait(300)
+	AddEventHandler('esx:pauseMenuActive', function(state)
+		if state then
+			isPaused = true
+			TriggerEvent('esx_status:setDisplay', 0.0)
+			return
+		end
+		isPaused = false
+		TriggerEvent('esx_status:setDisplay', 0.5)
+	end)
 
-			if IsPauseMenuActive() and not isPaused then
-				isPaused = true
-				TriggerEvent('esx_status:setDisplay', 0.0)
-			elseif not IsPauseMenuActive() and isPaused then
-				isPaused = false 
-				TriggerEvent('esx_status:setDisplay', 0.5)
-			end
+	-- Loading screen off event
+	AddEventHandler('esx:loadingScreenOff', function()
+		if not isPaused then
+			TriggerEvent('esx_status:setDisplay', 0.3)
 		end
 	end)
 end
-
--- Loading screen off event
-AddEventHandler('esx:loadingScreenOff', function()
-	if not isPaused then
-		TriggerEvent('esx_status:setDisplay', 0.3)
-	end
-end)
 
 -- Update server
 CreateThread(function()
