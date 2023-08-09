@@ -2,31 +2,28 @@
   let status = [];
 
   let renderStatus = function () {
-    $("#status_list").html("");
+    document.getElementById("status_list").innerHTML = "";
 
     for (let i = 0; i < status.length; i++) {
       if (!status[i].visible) {
         continue;
       }
 
-      let statusDiv = $(
-        '<div class="status">' +
-          '<div class="status_inner">' +
-          '<div class="status_val"></div>' +
-          "</div>" +
-          "</div>"
-      );
+      const statusVal = document.createElement("div");
+      statusVal.style.width = status[i].percent + "%";
+      statusVal.style.backgroundColor = status[i].color;
+      statusVal.classList.add("status_val");
 
-      statusDiv
-        .find(".status_inner")
-        .css({ border: "1px solid " + status[i].color });
+      const statusInner = document.createElement("div");
+      statusInner.classList.add("status_inner");
+      statusInner.style.border = "1px solid " + status[i].color;
+      statusInner.appendChild(statusVal);
 
-      statusDiv.find(".status_val").css({
-        "background-color": status[i].color,
-        width: status[i].percent + "%",
-      });
+      const statusDiv = document.createElement("div");
+      statusDiv.classList.add("status");
+      statusDiv.appendChild(statusInner);
 
-      $("#status_list").append(statusDiv);
+      document.getElementById("status_list").appendChild(statusDiv);
     }
   };
 
@@ -42,11 +39,11 @@
     }
 
     if (data.setDisplay) {
-      $("#status_list").css({ opacity: data.display });
+      document.getElementById("status_list").style.opacity = data.display;
     }
   };
 
-  window.onload = function (e) {
+  window.onload = function () {
     window.addEventListener("message", function (event) {
       onData(event.data);
     });
