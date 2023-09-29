@@ -54,6 +54,13 @@ RegisterNetEvent('esx_status:load')
 AddEventHandler('esx_status:load', function(status)
 	ESX.PlayerLoaded = true
 	TriggerEvent('esx_status:loaded')
+
+	:: check_status_table ::
+	if #Status == 0 then 
+		Citizen.Wait(1000)
+		goto check_status_table
+	end
+
 	for i=1, #Status, 1 do
 		for j=1, #status, 1 do
 			if Status[i].name == status[j].name then
