@@ -2,7 +2,7 @@ fx_version 'adamant'
 
 game 'gta5'
 
-description 'ESX Status'
+description 'Handles the overall status system for Hunger, Thrist and others'
 
 version '1.0'
 legacyversion '1.9.1'
