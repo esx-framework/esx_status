@@ -72,7 +72,7 @@ AddEventHandler('esx_status:load', function(status)
 				table.insert(data, {
 					name = Status[i].name,
 					val = Status[i].val,
-					percent = (Status[i].val / 1000000) * 100
+					percent = (Status[i].val / Config.StatusMax) * 100
 				})
 			end
 
