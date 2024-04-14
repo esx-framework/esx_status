@@ -1,4 +1,4 @@
-local Status, isPaused = {}, false
+local OriginalStatus, Status, isPaused = {}, {}, false
 
 function GetStatusData(minimal)
 	local status = {}
@@ -26,6 +26,13 @@ end
 
 AddEventHandler('esx_status:registerStatus', function(name, default, color, visible, tickCallback)
 	local status = CreateStatus(name, default, color, visible, tickCallback)
+	
+	for i=1, #OriginalStatus, 1 do
+		if status.name == OriginalStatus[i].name then
+			status.set(OriginalStatus[i].val)
+		end
+	end
+
 	table.insert(Status, status)
 end)
 
@@ -52,15 +59,9 @@ end)
 
 RegisterNetEvent('esx_status:load')
 AddEventHandler('esx_status:load', function(status)
+	OriginalStatus = status
 	ESX.PlayerLoaded = true
 	TriggerEvent('esx_status:loaded')
-	for i=1, #Status, 1 do
-		for j=1, #status, 1 do
-			if Status[i].name == status[j].name then
-				Status[i].set(status[j].val)
-			end
-		end
-	end
 
 	if Config.Display then TriggerEvent('esx_status:setDisplay', 0.5) end
 
