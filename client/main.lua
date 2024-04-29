@@ -152,6 +152,10 @@ AddEventHandler('esx_status:getStatus', function(name, cb)
 	end
 end)
 
+AddEventHandler('esx_status:getAllStatus', function(cb)
+	cb(Status)
+end)
+
 AddEventHandler('esx_status:setDisplay', function(val)
 	SendNUIMessage({
 		setDisplay = true,
