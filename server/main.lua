@@ -1,42 +1,27 @@
-local function setPlayerStatus(xPlayer, data)
-	data = data and json.decode(data) or {}
+AddEventHandler('esx:playerLoaded', function(src, xPlayer)
+	local status = MySQL.scalar.await('SELECT `status` FROM `users` WHERE `identifier` = ? LIMIT 1', { xPlayer.getIdentifier() })
 
-	xPlayer.set('status', data)
-	ESX.Players[xPlayer.source] = data
-	TriggerClientEvent('esx_status:load', xPlayer.source, data)
-end
-
-AddEventHandler('onResourceStart', function(resourceName)
-	if (GetCurrentResourceName() ~= resourceName) then
-	  	return
-	end
-
-	for _, xPlayer in pairs(ESX.Players) do
-		MySQL.scalar('SELECT status FROM users WHERE identifier = ?', { xPlayer.identifier }, function(result)
-			setPlayerStatus(xPlayer, result)
-		end)
-	end
+	status = status and json.decode(status) or {}
+	xPlayer.set('status', status)
+	TriggerClientEvent('esx_status:load', xPlayer.source, status)
 end)
 
-AddEventHandler('esx:playerLoaded', function(playerId, xPlayer)
-	MySQL.scalar('SELECT status FROM users WHERE identifier = ?', { xPlayer.identifier }, function(result)
-		setPlayerStatus(xPlayer, result)
-	end)
-end)
-
-AddEventHandler('esx:playerDropped', function(playerId, reason)
-	local xPlayer = ESX.GetPlayerFromId(playerId)
+AddEventHandler('esx:playerDropped', function(src, reason)
+	local xPlayer = ESX.GetPlayerFromId(src)
 	if not xPlayer then
 		return
 	end
-	local status = ESX.Players[xPlayer.source]
+	local status = xPlayer.get('status') or {}
 
-	MySQL.update('UPDATE users SET status = ? WHERE identifier = ?', { json.encode(status), xPlayer.identifier })
-	ESX.Players[xPlayer.source] = nil
+	MySQL.update('UPDATE users SET status = ? WHERE identifier = ?', { json.encode(status), xPlayer.getIdentifier() })
 end)
 
-AddEventHandler('esx_status:getStatus', function(playerId, statusName, cb)
-	local status = ESX.Players[playerId]
+AddEventHandler('esx_status:getStatus', function(src, statusName, cb)
+	local xPlayer = ESX.GetPlayerFromId(src)
+	if not xPlayer then
+		return
+	end
+	local status = xPlayer.get('status') or {}
 	for i = 1, #status do
 		if status[i].name == statusName then
 			return cb(status[i])
@@ -50,6 +35,5 @@ RegisterNetEvent('esx_status:update', function(status)
 		return
 	end
 
-	xPlayer.set('status', status)      -- save to xPlayer for compatibility
-	ESX.Players[xPlayer.source] = status -- save locally for performance
+	xPlayer.set('status', status)
 end)
