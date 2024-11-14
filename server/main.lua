@@ -26,6 +26,9 @@ end)
 
 AddEventHandler('esx:playerDropped', function(playerId, reason)
 	local xPlayer = ESX.GetPlayerFromId(playerId)
+	if not xPlayer then
+		return
+	end
 	local status = ESX.Players[xPlayer.source]
 
 	MySQL.update('UPDATE users SET status = ? WHERE identifier = ?', { json.encode(status), xPlayer.identifier })
@@ -43,8 +46,10 @@ end)
 
 RegisterNetEvent('esx_status:update', function(status)
 	local xPlayer = ESX.GetPlayerFromId(source)
-	if xPlayer then
-		xPlayer.set('status', status)	-- save to xPlayer for compatibility
-		ESX.Players[xPlayer.source] = status	-- save locally for performance
+	if not xPlayer then
+		return
 	end
+
+	xPlayer.set('status', status)      -- save to xPlayer for compatibility
+	ESX.Players[xPlayer.source] = status -- save locally for performance
 end)
