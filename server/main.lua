@@ -49,19 +49,3 @@ AddEventHandler('esx_status:update', function(status)
 		ESX.Players[xPlayer.source] = status	-- save locally for performance
 	end
 end)
-
-CreateThread(function()
-	while true do
-		Wait(10 * 60 * 1000)
-		local parameters = {}
-		for _, xPlayer in pairs(ESX.GetExtendedPlayers()) do
-			local status = ESX.Players[xPlayer.source]
-			if status and next(status) then
-				parameters[#parameters+1] = {json.encode(status), xPlayer.identifier}
-			end
-		end
-		if #parameters > 0 then
-			MySQL.prepare('UPDATE users SET status = ? WHERE identifier = ?', parameters)
-		end
-	end
-end)
