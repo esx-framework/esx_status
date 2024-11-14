@@ -41,8 +41,7 @@ AddEventHandler('esx_status:getStatus', function(playerId, statusName, cb)
 	end
 end)
 
-RegisterServerEvent('esx_status:update')
-AddEventHandler('esx_status:update', function(status)
+RegisterNetEvent('esx_status:update', function(status)
 	local xPlayer = ESX.GetPlayerFromId(source)
 	if xPlayer then
 		xPlayer.set('status', status)	-- save to xPlayer for compatibility
