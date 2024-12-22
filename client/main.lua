@@ -46,7 +46,6 @@ AddEventHandler('esx_status:unregisterStatus', function(name)
 end)
 
 RegisterNetEvent('esx:onPlayerLogout', function()
-	ESX.PlayerLoaded = false
 	Status = {}
 	if Config.Display then
 		SendNUIMessage({
@@ -57,8 +56,9 @@ RegisterNetEvent('esx:onPlayerLogout', function()
 end)
 
 RegisterNetEvent('esx_status:load', function(status)
+	while not ESX.PlayerLoaded do Wait(0) end
+
 	OriginalStatus = status
-	ESX.PlayerLoaded = true
 	TriggerEvent('esx_status:loaded')
 
 	if Config.Display then TriggerEvent('esx_status:setDisplay', 0.5) end
