@@ -45,9 +45,7 @@ AddEventHandler('esx_status:unregisterStatus', function(name)
 	end
 end)
 
-RegisterNetEvent('esx:onPlayerLogout')
-AddEventHandler('esx:onPlayerLogout', function()
-	ESX.PlayerLoaded = false
+RegisterNetEvent('esx:onPlayerLogout', function()
 	Status = {}
 	if Config.Display then
 		SendNUIMessage({
@@ -57,10 +55,10 @@ AddEventHandler('esx:onPlayerLogout', function()
 	end
 end)
 
-RegisterNetEvent('esx_status:load')
-AddEventHandler('esx_status:load', function(status)
+RegisterNetEvent('esx_status:load', function(status)
+	while not ESX.PlayerLoaded do Wait(0) end
+
 	OriginalStatus = status
-	ESX.PlayerLoaded = true
 	TriggerEvent('esx_status:loaded')
 
 	if Config.Display then TriggerEvent('esx_status:setDisplay', 0.5) end
@@ -96,8 +94,7 @@ AddEventHandler('esx_status:load', function(status)
 	end)
 end)
 
-RegisterNetEvent('esx_status:set')
-AddEventHandler('esx_status:set', function(name, val)
+RegisterNetEvent('esx_status:set', function(name, val)
 	for i=1, #Status, 1 do
 		if Status[i].name == name then
 			Status[i].set(val)
@@ -112,8 +109,7 @@ AddEventHandler('esx_status:set', function(name, val)
 	end
 end)
 
-RegisterNetEvent('esx_status:add')
-AddEventHandler('esx_status:add', function(name, val)
+RegisterNetEvent('esx_status:add', function(name, val)
 	for i=1, #Status, 1 do
 		if Status[i].name == name then
 			Status[i].add(val)
@@ -128,8 +124,7 @@ AddEventHandler('esx_status:add', function(name, val)
 	end
 end)
 
-RegisterNetEvent('esx_status:remove')
-AddEventHandler('esx_status:remove', function(name, val)
+RegisterNetEvent('esx_status:remove', function(name, val)
 	for i=1, #Status, 1 do
 		if Status[i].name == name then
 			Status[i].remove(val)
